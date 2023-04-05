@@ -1,38 +1,36 @@
 #include "Wire.h"
-#include "TetrisMatrices.h"
+#include "Tetris.h"
 
 int mypins[4] = {9,10,11,12}; //UP, DOWN, RIGHT, LEFT
-int myreadings[4] = {0,0,0,0};
-char mode;//options: menu, game
+byte myreadings[4];
+String mode;//options: MENU, GAME
+String actions[4] = {"UP", "DOWN", "RIGHT", "LEFT"};
+String action; //UP, DOWN, RIGHT, LEFT
 
 void setup(){
-  for (i=0,i<4,i++){
-    pinmode(mypins[i], INPUT);
+  for (int i=0;i<4;i++){
+    pinMode(mypins[i], INPUT);
   }
-  mode = "menu"
+  mode = "MENU";
   Serial.begin(9600);
   Wire.begin();
 }
 
 void loop(){
-  for (i=0,i<4,i++){
+  for (int i=0; i<4; i++){
     myreadings[i] = digitalRead(mypins[i]);
-  }
 
+    if (myreadings[i] == LOW){//it is a pull up button
+      action = actions[i];
+    }
+    Serial.println(action);
+  }
+  
   Wire.beginTransmission(4);
   ProcessState();
   Wire.endTransmission(4);
 }
 
 void ProcessState(){
-  if (mode == "menu"){
-    Serial.println("Press the top button to start");
-    if (myreadings[0] == 1){
-      mode = "game";
-      Serial.println("Game Starting...")
-    }
-  }
-  if (mode == "game"){
-
-  }
+  //process states
 }
