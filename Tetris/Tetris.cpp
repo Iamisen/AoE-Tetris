@@ -8,7 +8,7 @@
 #include <time.h>
 #include <string>
 #include <iostream>
-#include <map>
+#include <map.h>
 
 struct Sprite {
     int *shape;

@@ -10,7 +10,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (i<=10){
-    Serial.println("Hey There");
+    Serial.println(base_matrix);
     delay(100);
     i++;
   }
