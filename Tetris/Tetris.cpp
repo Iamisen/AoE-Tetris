@@ -1,74 +1,15 @@
 /*
     library for the logic of our tetris game.
     made by MRWRM, Columbia University.
-    last updated on 8/4/2023 at 3:50am
+    last updated on 12/4/2023 at 8:00pm
 */
-#include <Arduino.h>
+
+#include "Arduino.h"
 #include <Tetris.h>
 #include <time.h>
-#include <string>
-#include <iostream>
-#include <map.h>
-
-struct Sprite {
-    int *shape;
-    int x;
-    int y;
-}
-
-struct Table {
-    int table[5][5];
-}
 
 Tetris::Tetris() {
-    //shapes
-
-    Table square {
-        {1, 1, 0, 0, 0},
-        {1, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        };
-
-    Table l{
-        {1, 0, 0, 0, 0},
-        {1, 1, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        };
-
-    Table even_l{
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 1, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    };
-
-    Table line{
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 1, 1, 1, 1},
-        };
-
-    map<std::string,Table> shapes;
-    shapes.insert(std::pair<string,Triple>("square",square));
-    shapes.insert(std::pair<string,Triple>("l",l));
-    shapes.insert(std::pair<string,Triple>("even_l",even_l));
-    shapes.insert(std::pair<string,Triple>("line",line));
-    
-    string shapes_key[4] = {
-        "square",
-        "l",
-        "even_l",
-        "line",
-    };
-
-    bool block_fallong = false;
+    bool block_falling = false;
     struct Sprite block;
 
 /*
@@ -78,31 +19,31 @@ Tetris::Tetris() {
     actions.insert(std::pair<string, signed int>("up", -1));
     actions.insert(std::pair<string, signed int>("left", -1));
 */
-
-    int base_matrix [16][8] = {
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0},
-    };
 }
 
-int Tetris::ClearMatrice(int[5][5] block){
+int Tetris::SliceMatrix(int row_start, int row_end, int column_start, int column_end, int block[5][5]){
+    int i = 0; int j = 0;
+    int x = 0; int y = 0;
+    int result[row_end - row_start][column_end - column_start];
+
+    for (i = row_start; i <= row_end; i++){
+        for (j = column_start; j <= column_end; j++){
+            result[x][y] = block[i][j];
+            y++;
+        }
+        y = 0;
+        x++;
+    }
+
+    return result;
+}
+
+int Tetris::ClearMatrice(int block[5][5]){
     int row = 5; int column = 5;
     bool iszero = true;
-    for (i=0, i<5, i++){
-        for (j=0, j<5, j++){
+    int i = 0; int j = 0;
+    for (i=0; i<5; i++){
+        for (j=0; j<5; j++){
             if (block[i][j] == 1){
                 iszero = false;
             }
@@ -111,7 +52,7 @@ int Tetris::ClearMatrice(int[5][5] block){
             row--;
         }
 
-        for (j=0, j<5, j++){
+        for (j=0; j<5; j++){
             if (block[j][i] == 1){
                 iszero = false;
             }
@@ -122,18 +63,20 @@ int Tetris::ClearMatrice(int[5][5] block){
         iszero = true; row = 5; column = 5;
     }
     
-    if (row == 0 && column == 0){
-        return matrix[0][0];
+    return SliceMatrix(0,row,0,column,block);
+
+    /*if (row == 0 && column == 0){
+        return 0;
     }
     else if (row == 0){
-        return matrix[0][0:column];
+        return SliceMatrix(0,5,0,column,block);
     }
     else if (column == 0){
-        return matrix[0:row][0];
+        return SliceMatrix(0,row,0,5,block)
     }
     else {
-        return block[0:row][0:column];
-    }
+        return SliceMatrix(0,row,0,column,block) block[0:row][0:column];
+    }*/
 }
 
 int Tetris::AddMatrices(Sprite block, int base_matrix[16][8]){
@@ -141,14 +84,13 @@ int Tetris::AddMatrices(Sprite block, int base_matrix[16][8]){
     //matrice 2 is the added piece
 
     int matrix = block.shape;
-    int shape[2] = { sizeof(matrix), sizeof(matrix[0]) };//first element is nnumber of rows, second is number of columns
-
     int result[16][8];
 
     for (int row=0; row<=16; row++){
         for (int column=0; column<=8; column++){
-            if ((x <= row <= shape[0] + x) && (y <= column <= shape[1] + y)){
-                result[row][column] = base_matrix[row][column] + matrix[row - x][column - y];
+            if ((block.x <= row <= shape[0] + block.x) && (block.y <= column <= shape[1] + block.y)){
+                int add = matrix[row - block.x][column - block.y];
+                result[row][column] = base_matrix[row][column] + add;
                 if (result[row][column] > 1){
                     return base_matrix;
                 }
@@ -189,8 +131,7 @@ int Tetris::RotateShape(int base_matrix[16][8], Sprite block) { // x and y will 
     return AddMatrices(base_matrix, block);
 }
 
-int Tetris::TransposeMatrix(int matrix[][]) {
-    int shape[2] = { sizeof(matrix), sizeof(matrix[0]) };
+int Tetris::TransposeMatrix(int matrix[5][5]) {
     int result[shape[0]][shape[1]];
     
     for (int i = 0; i <= shape[0]; i++) {
@@ -205,17 +146,17 @@ int Tetris::TransposeMatrix(int matrix[][]) {
 int Tetris::SpawnShape(int base_matrix[16][8]) {
 
     srand(time(0)); //initialiwe seed at current time
-    int index = rand() % sizeof(shapes);
-    block.shape = shapes[shapes_key[index]];
+    int index = rand() % (sizeof(shapes)/sizeof(shapes[0]));
+    block.shape = shapes[index]; //size of shapes over size of a pointer
     
-    int shape_half_length = sizeof(initialized_shape[0]) / 2; //we have taken lenghth as an int on purpose in order to have an integer o work with
+    int shape_half_length = sizeof(block.shape[0]) / 2; //we have taken lenghth as an int on purpose in order to have an integer o work with
     block.x = 4 - shape_half_length;
     block.y = 0;
 
     return AddMatrices(block, base_matrix); //shape is initialized at top middle
 }
 
-void Tetris::Action(Sprite block, string action){
+void Tetris::Action(Sprite block, const char *action){
     if (action == "UP"){
         block.y--;
     }
@@ -229,3 +170,5 @@ void Tetris::Action(Sprite block, string action){
         block.x--;
     }
 }
+
+//use const instead of sizeof

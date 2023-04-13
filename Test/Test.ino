@@ -3,6 +3,7 @@
 int i = 0;
 void setup() {
   // put your setup code here, to run once:
+  //Tetris tetris();
   Serial.begin(9600);
   Serial.println("Testing the code...");
 }
@@ -10,7 +11,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (i<=10){
-    Serial.println(base_matrix);
+    Serial.println(i);
     delay(100);
     i++;
   }

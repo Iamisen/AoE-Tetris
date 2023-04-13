@@ -3,9 +3,9 @@
 
 int mypins[4] = {9,10,11,12}; //UP, DOWN, RIGHT, LEFT
 byte myreadings[4];
-String mode;//options: MENU, GAME
-String actions[4] = {"UP", "DOWN", "RIGHT", "LEFT"};
-String action; //UP, DOWN, RIGHT, LEFT, NONE
+char mode;//options: MENU, GAME
+char *actions[4] = {"UP", "DOWN", "RIGHT", "LEFT"};
+char action; //UP, DOWN, RIGHT, LEFT, NONE
 int block = 0; //number of blocks dropped so far
 
 void setup(){
@@ -33,9 +33,10 @@ void loop(){
     Serial.println(action);
   }
   
-  Wire.beginTransmission(4);
+  Wire.beginTransmission(0x70); //default address for HT16K33
   ProcessState();
-  Wire.endTransmission(4);
+  Wire.write(screen);
+  Wire.endTransmission(0x70);
 }
 
 void ProcessState(){
